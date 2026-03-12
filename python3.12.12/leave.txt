@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <title>學生請假系統 - 請假審核</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ===== 頂端藍色區塊 / 校名 ===== */
+    .site-header {
+      background: #003b7a;
+      color: #fff;
+    }
+    .site-header-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      gap: 14px;
+    }
+    .site-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #fff;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .site-logo img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+    .site-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .site-title-main {
+      font-size: 18px;
+      letter-spacing: 0.12em;
+    }
+    .site-title-sub {
+      font-size: 13px;
+      opacity: 0.85;
+    }
+
+    /* ===== 深藍導覽列 ===== */
+    .nav-bar {
+      background: #00539f;
+    }
+    .nav-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+    }
+    .nav-menu {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .nav-item {
+      position: relative;
+    }
+    .nav-link {
+      display: block;
+      padding: 10px 18px;
+      font-size: 14px;
+      color: #e5f0ff;
+      white-space: nowrap;
+    }
+    .nav-link:hover,
+    .nav-item.active > .nav-link {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+
+    /* 下拉子選單 */
+    .nav-item.has-submenu:hover .submenu {
+      display: block;
+    }
+    .submenu {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: 100%;
+      min-width: 160px;
+      background: #0077c8;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10;
+    }
+    .submenu a {
+      display: block;
+      padding: 8px 14px;
+      font-size: 13px;
+      color: #f9fafb;
+    }
+    .submenu a:hover {
+      background: rgba(255,255,255,0.12);
+    }
+
+    @media (max-width: 720px) {
+      .nav-inner {
+        padding: 0 8px;
+      }
+      .nav-link {
+        padding: 8px 10px;
+        font-size: 13px;
+      }
+    }
+
+    /* ===== 麵包屑 ===== */
+    .breadcrumb-bar {
+      background: #e5e7eb;
+      border-bottom: 1px solid #d1d5db;
+    }
+    .breadcrumb-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 6px 16px;
+      font-size: 12px;
+      color: #4b5563;
+    }
+    .breadcrumb-inner span.sep {
+      margin: 0 4px;
+    }
+
+    /* ===== 主內容區 ===== */
+    .page {
+      max-width: 1160px;
+      margin: 16px auto 24px;
+      padding: 0 16px;
+    }
+
+    .article-card {
+      background: #ffffff;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      padding: 18px 20px 20px;
+    }
+
+    .article-header {
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+    }
+    .article-title {
+      margin: 0 0 6px;
+      font-size: 20px;
+    }
+    .article-meta {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .article-intro {
+      font-size: 14px;
+      color: #374151;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    /* === 統計卡片 === */
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 900px) {
+      .summary-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+    @media (max-width: 520px) {
+      .summary-cards {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+      }
+    }
+    .summary-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      padding: 8px 10px;
+      background: #f9fafb;
+    }
+    .summary-label {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+    .summary-value {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .summary-value.pending { color: #b45309; }
+    .summary-value.approved { color: #15803d; }
+    .summary-value.rejected { color: #b91c1c; }
+
+    /* === 篩選工具列 === */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+    }
+    .toolbar .field {
+      font-size: 13px;
+      color: #4b5563;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .toolbar label {
+      white-space: nowrap;
+    }
+    .toolbar input[type="text"],
+    .toolbar select {
+      border-radius: 3px;
+      border: 1px solid #d1d5db;
+      padding: 3px 6px;
+      font-size: 13px;
+      background: #ffffff;
+      outline: none;
+    }
+    .toolbar input[type="text"]:focus,
+    .toolbar select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px rgba(37,99,235,0.3);
+    }
+
+    @media (max-width: 600px) {
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .toolbar .field {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .toolbar input[type="text"],
+      .toolbar select {
+        width: 100%;
+      }
+    }
+
+    /* === 表格 === */
+    .table-wrap {
+      margin-top: 4px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13px;
+      background: #ffffff;
+    }
+    th, td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+    th {
+      background: #f3f4f6;
+      font-size: 12px;
+      white-space: nowrap;
+      color: #374151;
+    }
+    tbody tr:nth-child(even) td {
+      background: #f9fafb;
+    }
+    tbody tr:hover td {
+      background: #e5f1ff;
+    }
+
+    /* === 狀態顏色 + 按鈕 === */
+    .status-chip {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .status-approved {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .status-rejected {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .pill-class {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid #c7d2fe;
+      background: #eef2ff;
+      color: #4338ca;
+    }
+
+    .action-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+    }
+    .inline-form {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin: 0;
+    }
+    .btn {
+      padding: 3px 8px;
+      font-size: 11px;
+      border-radius: 3px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      background: #e5e7eb;
+    }
+    .btn-approve {
+      background: #16a34a;
+      color: #ffffff;
+      border-color: #15803d;
+    }
+    .btn-approve:hover {
+      background: #15803d;
+    }
+    .btn-reject {
+      background: #ef4444;
+      color: #ffffff;
+      border-color: #b91c1c;
+    }
+    .btn-reject:hover {
+      background: #b91c1c;
+    }
+
+    .comment-input {
+      border-radius: 3px;
+      border: 1px solid #d1d5db;
+      padding: 3px 6px;
+      font-size: 11px;
+      min-width: 140px;
+    }
+    .comment-input:focus {
+      border-color: #2563eb;
+      outline: none;
+      box-shadow: 0 0 0 1px rgba(37,99,235,0.3);
+    }
+
+    .status-extra {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+    .review-time {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    @media (max-width: 720px) {
+      th, td {
+        font-size: 12px;
+      }
+      .comment-input {
+        min-width: 110px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="site-logo">
+        <img src="{{ url_for('static', filename='img/cover.png') }}" alt="School Logo">
+      </div>
+      <div class="site-title-block">
+        <div class="site-title-main"> XX校務系統</div>
+        <div class="site-title-sub">學生請假系統 Student Leave System</div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="nav-bar">
+    <div class="nav-inner">
+      <ul class="nav-menu">
+        <li class="nav-item"><a class="nav-link" href="/">首頁</a></li>
+        <li class="nav-item has-submenu">
+          <a class="nav-link" href="#">校務服務</a>
+          <div class="submenu">
+            <a href="/attendance/today">出勤列表</a>
+            <a href="/leave">學生請假系統</a>
+          </div>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="/leave">學生請假系統</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/attendance/today">出勤列表</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="breadcrumb-bar">
+    <div class="breadcrumb-inner">
+      首頁 <span class="sep">›</span> 校務服務 <span class="sep">›</span> 學生請假系統
+    </div>
+  </div>
+
+  <main class="page">
+    <article class="article-card">
+      <header class="article-header">
+        <h1 class="article-title">學生請假系統 ─ 審核後台</h1>
+        <div class="article-meta">
+          目前僅開放導師及教官登入使用。<b>系統每 20 秒自動更新數據</b>。
+        </div>
+      </header>
+
+      <section class="article-intro">
+        ◎ 操作說明：<br>
+        ‧ 於上方欄位輸入學生姓名或班級關鍵字（例如：301、資處二甲）。<br>
+        ‧ 狀態預設為「全部」，可切換為「只看待審核」以加快審核流程。<br>
+        ‧ 對於待審案件，可直接按下「批准」或「駁回」，系統將自動以 LINE 通知學生結果。
+      </section>
+
+      <div id="stats-area">
+        <section class="summary-cards">
+          <div class="summary-card">
+            <div class="summary-label">總申請數</div>
+            <div class="summary-value">{{ total }}</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">待審核</div>
+            <div class="summary-value pending">{{ pending_count }}</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">已批准</div>
+            <div class="summary-value approved">{{ approved_count }}</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">已駁回</div>
+            <div class="summary-value rejected">{{ rejected_count }}</div>
+          </div>
+        </section>
+      </div>
+
+      <section class="toolbar">
+        <div class="field">
+          <label for="searchName">姓名：</label>
+          <input type="text" id="searchName" placeholder="輸入姓名關鍵字">
+        </div>
+        <div class="field">
+          <label for="searchClass">班級：</label>
+          <input type="text" id="searchClass" placeholder="例如：301、資處二甲">
+        </div>
+        <div class="field">
+          <label for="statusFilter">狀態：</label>
+          <select id="statusFilter">
+            <option value="all">全部</option>
+            <option value="pending">只看待審核</option>
+            <option value="approved">只看已批准</option>
+            <option value="rejected">只看已駁回</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="table-wrap">
+        <table id="leaveTable">
+          <thead>
+            <tr>
+              <th>編號</th>
+              <th>姓名</th>
+              <th>班級</th>
+              <th>手機</th>
+              <th>事由</th>
+              <th>請假時間</th>
+              <th>申請時間</th>
+              <th>狀態</th>
+              <th>操作 / 結果</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            {% for r in requests %}
+              {% set rid = r.id %}
+              {% set name = r.name %}
+              {% set phone = r.phone %}
+              {% set reason = r.reason %}
+              {% set ltime = r.leave_time %}
+              {% set created_at = r.created_at %}
+              {% set status = r.status or 'pending' %}
+              {% set comment = r.review_comment or '' %}
+              {% set reviewed_at = r.reviewed_at or '' %}
+              {% set class_name = r.class_name or '' %}
+
+              {% if status == 'pending' %}
+                {% set status_text = '待審核' %}
+                {% set status_class = 'status-pending' %}
+              {% elif status == 'approved' %}
+                {% set status_text = '已批准' %}
+                {% set status_class = 'status-approved' %}
+              {% else %}
+                {% set status_text = '已駁回' %}
+                {% set status_class = 'status-rejected' %}
+              {% endif %}
+
+              <tr data-status="{{ status }}" data-name="{{ name }}" data-class="{{ class_name }}">
+                <td>{{ rid }}</td>
+                <td>{{ name }}</td>
+                <td>
+                  {% if class_name %}
+                    <span class="pill-class">{{ class_name }}</span>
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+                <td>{{ phone }}</td>
+                <td>{{ reason }}</td>
+                <td>{{ ltime }}</td>
+                <td>{{ created_at }}</td>
+                <td>
+                  <span class="status-chip {{ status_class }}">{{ status_text }}</span>
+                </td>
+                <td>
+                  {% if status == 'pending' %}
+                    <div class="action-btns">
+                      <form method="post" action="/leave/approve" class="inline-form">
+                        <input type="hidden" name="id" value="{{ rid }}">
+                        <button type="submit" class="btn btn-approve">批准</button>
+                      </form>
+                      <form method="post" action="/leave/reject" class="inline-form">
+                        <input type="hidden" name="id" value="{{ rid }}">
+                        <input type="text" name="comment" placeholder="駁回原因（選填）" class="comment-input">
+                        <button type="submit" class="btn btn-reject">駁回</button>
+                      </form>
+                    </div>
+                  {% else %}
+                    <div class="status-extra">
+                      狀態：{{ status_text }}
+                      {% if status == 'rejected' and comment %}
+                        <br>（原因：{{ comment }}）
+                      {% endif %}
+                      {% if reviewed_at %}
+                        <br><span class="review-time">審核時間：{{ reviewed_at }}</span>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+
+    </article>
+  </main>
+
+  <script>
+    // 1. 原有的篩選邏輯
+    function applyFilters() {
+      const nameInput = document.getElementById("searchName").value.trim().toLowerCase();
+      const classInput = document.getElementById("searchClass").value.trim().toLowerCase();
+      const statusFilter = document.getElementById("statusFilter").value;
+      const rows = document.querySelectorAll("#leaveTable tbody tr");
+
+      rows.forEach(tr => {
+        const rowStatus = tr.getAttribute("data-status");
+        const rowName = (tr.getAttribute("data-name") || "").toLowerCase();
+        const rowClass = (tr.getAttribute("data-class") || "").toLowerCase();
+
+        let ok = true;
+        if (nameInput && !rowName.includes(nameInput)) ok = false;
+        if (classInput && !rowClass.includes(classInput)) ok = false;
+        if (statusFilter !== "all" && rowStatus !== statusFilter) ok = false;
+
+        tr.style.display = ok ? "" : "none";
+      });
+    }
+
+    // 2. 自動更新邏輯 (AJAX Polling)
+    async function fetchUpdates() {
+      try {
+        // 向當前 URL 請求數據
+        const response = await fetch(window.location.href);
+        const text = await response.text();
+        
+        // 解析返回的 HTML
+        const parser = new DOMParser();
+        const newDoc = parser.parseFromString(text, 'text/html');
+
+        // 更新統計卡片
+        const newStats = newDoc.getElementById('stats-area').innerHTML;
+        document.getElementById('stats-area').innerHTML = newStats;
+
+        // 更新表格內容
+        const newTableBody = newDoc.getElementById('table-body').innerHTML;
+        document.getElementById('table-body').innerHTML = newTableBody;
+
+        // 重要：更新內容後必須重新套用篩選條件，否則搜尋會失效
+        applyFilters();
+        
+        console.log('數據已自動同步: ' + new Date().toLocaleTimeString());
+      } catch (error) {
+        console.error('更新失敗:', error);
+      }
+    }
+
+    // 綁定事件
+    document.getElementById("searchName").addEventListener("input", applyFilters);
+    document.getElementById("searchClass").addEventListener("input", applyFilters);
+    document.getElementById("statusFilter").addEventListener("change", applyFilters);
+
+    // 設定定時器：每 5 秒更新一次 (5000 毫秒)
+    setInterval(fetchUpdates, 5000);
+  </script>
+
+</body>
+</html>

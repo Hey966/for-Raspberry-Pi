@@ -1,0 +1,7 @@
+ngrok http --region ap 5000  開啟網路
+
+
+
+
+cd "C:\Users\jack0\Desktop\for Raspberry Pi\python3.13.7"
+python app.py

@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <title>{{ today_str }} 出勤列表</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* ... 保持你原本的所有 CSS 樣式不變 ... */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f3f4f6;
+      color:#111827;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* ===== 頂端藍色區塊 / 校名 ===== */
+    .site-header {
+      background: #003b7a;
+      color: #fff;
+    }
+    .site-header-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      gap: 14px;
+    }
+    .site-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #fff;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .site-logo img {
+      max-width: 100%;
+      height: auto;
+    }
+    .site-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .site-title-main {
+      font-size: 18px;
+      letter-spacing: 0.12em;
+    }
+    .site-title-sub {
+      font-size: 13px;
+      opacity: 0.85;
+    }
+
+    /* ===== 深藍導覽列 ===== */
+    .nav-bar {
+      background: #00539f;
+    }
+    .nav-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+    }
+    .nav-menu {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .nav-item {
+      position: relative;
+    }
+    .nav-link {
+      display: block;
+      padding: 10px 18px;
+      font-size: 14px;
+      color: #e5f0ff;
+      white-space: nowrap;
+    }
+    .nav-link:hover,
+    .nav-item.active > .nav-link {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+    .nav-item.has-submenu:hover .submenu {
+      display: block;
+    }
+    .submenu {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: 100%;
+      min-width: 160px;
+      background: #0077c8;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10;
+    }
+    .submenu a {
+      display: block;
+      padding: 8px 14px;
+      font-size: 13px;
+      color: #f9fafb;
+    }
+    .submenu a:hover {
+      background: rgba(255,255,255,0.12);
+    }
+    @media (max-width: 720px) {
+      .nav-inner { padding: 0 8px; }
+      .nav-link { padding: 8px 10px; font-size: 13px; }
+    }
+
+    /* ===== 麵包屑 ===== */
+    .breadcrumb-bar {
+      background: #e5e7eb;
+      border-bottom: 1px solid #d1d5db;
+    }
+    .breadcrumb-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 6px 16px;
+      font-size: 12px;
+      color: #4b5563;
+    }
+    .breadcrumb-inner span.sep { margin: 0 4px; }
+
+    /* ===== 主內容容器 ===== */
+    .page {
+      max-width: 1160px;
+      margin: 16px auto 24px;
+      padding: 0 16px;
+    }
+    .article-card {
+      background: #ffffff;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      padding: 16px 18px 18px;
+    }
+
+    /* === 原本出勤頁的樣式 === */
+    .card {
+      width:100%;
+      background:#ffffff;
+      padding:16px 16px 14px;
+      border-radius:14px;
+      box-shadow:
+        0 12px 24px rgba(15,23,42,0.08),
+        0 1px 2px rgba(15,23,42,0.06);
+      border:1px solid rgba(148,163,184,0.35);
+    }
+    .card-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:16px;
+    }
+    .title-block h1 {
+      font-size: 20px;
+      margin:0 0 4px 0;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .title-pill {
+      font-size:11px;
+      padding:2px 8px;
+      border-radius:999px;
+      background:#eff6ff;
+      color:#1d4ed8;
+      border:1px solid #bfdbfe;
+    }
+    .subtitle {
+      font-size:13px;
+      color:#6b7280;
+      line-height:1.5;
+    }
+    .subtitle strong { color:#374151; }
+    .chip-row {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:6px;
+    }
+    .chip {
+      background:#f3f4f6;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      display:flex;
+      align-items:center;
+      gap:4px;
+      color:#4b5563;
+    }
+    .chip strong {
+      font-size:12px;
+      color:#111827;
+    }
+    .chip.badge-ok {
+      background:#ecfdf3;
+      color:#15803d;
+    }
+    .chip.badge-miss {
+      background:#fef2f2;
+      color:#b91c1c;
+    }
+    .summary-grid {
+      display:grid;
+      grid-template-columns: repeat(4,minmax(0,1fr));
+      gap:10px;
+      margin:10px 0 18px;
+    }
+    .summary-card2 {
+      background:#f9fafb;
+      border-radius:14px;
+      padding:10px 12px;
+      border:1px solid #e5e7eb;
+    }
+    .summary-label2 {
+      font-size:11px;
+      color:#6b7280;
+      margin-bottom:4px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .summary-value2 {
+      font-size:18px;
+      font-weight:700;
+      color:#111827;
+    }
+    .summary-tag-ok {
+      font-size:11px;
+      color:#166534;
+      background:#dcfce7;
+      border-radius:999px;
+      padding:1px 6px;
+    }
+    .summary-tag-rate {
+      font-size:11px;
+      color:#1d4ed8;
+      background:#e0edff;
+      border-radius:999px;
+      padding:1px 6px;
+    }
+
+    .class-summary-card {
+      margin-bottom: 18px;
+      background:#ffffff;
+      border-radius:14px;
+      border:1px solid #e5e7eb;
+      padding:10px 12px;
+    }
+    .class-summary-title {
+      font-size:13px;
+      font-weight:600;
+      color:#111827;
+      margin-bottom:6px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .class-summary-title span {
+      font-size:11px;
+      color:#6b7280;
+    }
+    .class-summary-table {
+      width:100%;
+      border-collapse:collapse;
+      font-size:12px;
+    }
+    .class-summary-table th,
+    .class-summary-table td {
+      padding:6px 8px;
+      border-bottom:1px solid #f3f4f6;
+      text-align:left;
+      white-space:nowrap;
+    }
+    .class-summary-table th {
+      color:#6b7280;
+      font-weight:600;
+      background:#f9fafb;
+    }
+    .class-summary-table tr:hover {
+      background:#eef2ff;
+      cursor:pointer;
+    }
+    .class-name-cell {
+      font-weight:600;
+      color:#111827;
+    }
+    .class-rate-good {
+      color:#166534;
+      font-weight:600;
+    }
+    .class-rate-bad {
+      color:#b91c1c;
+      font-weight:600;
+    }
+
+    .toolbar {
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:8px;
+    }
+    .toolbar-left {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    .field {
+      display:flex;
+      align-items:center;
+      gap:6px;
+      font-size:12px;
+      color:#4b5563;
+    }
+    .field input[type="text"],
+    .field select {
+      padding:6px 9px;
+      border-radius:8px;
+      border:1px solid #d1d5db;
+      font-size:13px;
+      outline:none;
+      min-width:140px;
+      background:white;
+    }
+    .field input[type="checkbox"] {
+      transform: scale(1.1);
+    }
+    .field input[type="text"]:focus,
+    .field select:focus {
+      border-color:#4f46e5;
+      box-shadow:0 0 0 1px rgba(79,70,229,0.4);
+    }
+    .toolbar-right {
+      font-size:12px;
+      color:#6b7280;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .refresh-btn {
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid #4f46e5;
+      background:#eef2ff;
+      font-size:12px;
+      color:#4f46e5;
+      cursor:pointer;
+    }
+    .refresh-btn:hover {
+      background:#e0e7ff;
+    }
+
+    .table-wrap {
+      margin-top:6px;
+      border-radius:14px;
+      overflow:hidden;
+      border:1px solid #e5e7eb;
+      background:#ffffff;
+    }
+    table {
+      width:100%;
+      border-collapse: collapse;
+      font-size:13px;
+    }
+    thead {
+      background:#f9fafb;
+    }
+    th, td {
+      padding:9px 10px;
+      text-align:left;
+      white-space:nowrap;
+    }
+    th {
+      font-weight:600;
+      color:#4b5563;
+      border-bottom:1px solid #e5e7eb;
+    }
+    th.sortable {
+      cursor:pointer;
+      user-select:none;
+    }
+    th.sortable:hover {
+      background:#eef2ff;
+    }
+    th .sort-indicator {
+      font-size:11px;
+      margin-left:4px;
+      color:#9ca3af;
+    }
+    tbody tr:nth-child(even) {
+      background:#f9fafb;
+    }
+    tbody tr:hover {
+      background:#eef2ff;
+    }
+    .name-cell {
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .name-avatar {
+      width:22px;
+      height:22px;
+      border-radius:999px;
+      background:linear-gradient(135deg,#60a5fa,#4f46e5);
+      color:white;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:11px;
+      font-weight:600;
+      flex-shrink:0;
+    }
+    .status-pill {
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      padding:2px 9px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:500;
+    }
+    .status-ok {
+      background:#e0f7ec;
+      color:#166534;
+    }
+    .status-dot-ok {
+      width:8px;height:8px;border-radius:999px;background:#22c55e;
+    }
+    .status-miss {
+      background:#fef2f2;
+      color:#b91c1c;
+    }
+    .status-dot-miss {
+      width:8px;height:8px;border-radius:999px;background:#ef4444;
+    }
+    .status-leave {
+      background:#e0edff;
+      color:#1d4ed8;
+    }
+    .status-dot-leave {
+      width:8px;height:8px;border-radius:999px;background:#3b82f6;
+    }
+    .time-cell {
+      font-variant-numeric: tabular-nums;
+      color:#4b5563;
+    }
+    .time-cell.empty {
+      color:#d1d5db;
+      font-style:italic;
+    }
+
+    @media (max-width:768px) {
+      .card { padding:14px 12px; }
+      .card-header { flex-direction:column; align-items:flex-start; }
+      .summary-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .class-summary-card { padding:8px 10px; }
+      .class-summary-table th,
+      .class-summary-table td { padding:5px 6px; }
+      .toolbar { flex-direction:column; align-items:flex-start; gap:8px; }
+      .toolbar-right { align-self:flex-end; }
+      th, td { padding:7px 8px; }
+    }
+    @media (max-width:480px) {
+      .summary-grid { grid-template-columns: repeat(1,minmax(0,1fr)); }
+      .field input[type="text"],
+      .field select { min-width:0; width:100%; }
+      .toolbar-right { align-self:flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="site-logo">
+        <img src="{{ url_for('static', filename='img/cover.png') }}" alt="School Logo">
+      </div>
+      <div class="site-title-block">
+        <div class="site-title-main"> 航院校務系統</div>
+        <div class="site-title-sub">出勤列表 Attendance List</div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="nav-bar">
+    <div class="nav-inner">
+      <ul class="nav-menu">
+        <li class="nav-item"><a class="nav-link" href="/">首頁</a></li>
+        <li class="nav-item has-submenu">
+          <a class="nav-link" href="#">校務服務</a>
+          <div class="submenu">
+            <a href="/attendance/today">出勤列表</a>
+            <a href="/leave">學生請假系統</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/leave">學生請假系統</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="/attendance/today">出勤列表</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="breadcrumb-bar">
+    <div class="breadcrumb-inner">
+      首頁 <span class="sep">›</span> 校務服務 <span class="sep">›</span> 出勤列表
+    </div>
+  </div>
+
+  <main class="page">
+    <article class="article-card">
+      <div class="card">
+        <div class="card-header">
+          <div class="title-block">
+            <h1>
+              出勤列表
+              <span class="title-pill">{{ today_str }}</span>
+            </h1>
+            <div class="subtitle">
+              截止時間：<strong>{{ cutoff }}</strong><br>
+              只顯示已在 <code>users.json</code> / <code>members.json</code> 建立的名單。
+              <div class="chip-row">
+                <div class="chip badge-ok">🟢 <strong>已簽到</strong></div>
+                <div class="chip badge-miss">🔴 <strong>未簽到</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="meta">
+            <span id="syncStatus"><span class="meta-dot"></span> 出勤伺服器運行中</span>
+          </div>
+        </div>
+
+        <div class="summary-grid" id="summary"></div>
+
+        <div id="classSummary" class="class-summary-card"></div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div class="field">
+              <span>搜尋姓名：</span>
+              <input type="text" id="searchInput" placeholder="輸入關鍵字..." />
+            </div>
+            <div class="field">
+              <span>狀態篩選：</span>
+              <select id="statusFilter">
+                <option value="all">全部</option>
+                <option value="checked_in">只看已簽到</option>
+                <option value="not_checked">只看未簽到</option>
+                <option value="on_leave">只看請假</option>
+              </select>
+            </div>
+            <div class="field">
+              <span>班級篩選：</span>
+              <select id="classFilter">
+                <option value="all">全部</option>
+              </select>
+            </div>
+            <div class="field">
+              <label><input type="checkbox" id="lateOnly" /> 只顯示遲到</label>
+            </div>
+          </div>
+
+          <div class="toolbar-right">
+            <span id="rowCountLabel">顯示筆數：0</span>
+            <button id="refreshBtn" class="refresh-btn">重新整理</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="sortable" data-key="name">
+                  姓名 <span class="sort-indicator" id="sortIndicator-name"></span>
+                </th>
+                <th class="sortable" data-key="class">
+                  班級 <span class="sort-indicator" id="sortIndicator-class"></span>
+                </th>
+                <th class="sortable" data-key="status">
+                  狀態 <span class="sort-indicator" id="sortIndicator-status"></span>
+                </th>
+                <th class="sortable" data-key="time_str">
+                  簽到時間 <span class="sort-indicator" id="sortIndicator-time_str"></span>
+                </th>
+                <th>是否遲到</th>
+              </tr>
+            </thead>
+
+            <tbody id="tbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <script>
+    const API_URL = "/attendance/today.json";
+    let rawItems = [];
+    let currentSortKey = "name";
+    let currentSortDir = "asc";
+    let lastDataHash = ""; // 用於檢測資料是否有變動
+
+    function fetchAttendance() {
+      // 視覺反饋：按下按鈕時稍微變色
+      const btn = document.getElementById("refreshBtn");
+      btn.innerText = "讀取中...";
+      
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(data => {
+          const newItems = data.items || [];
+          
+          // 檢查資料是否有實質變動 (簡單比較長度或內容)
+          const currentHash = JSON.stringify(newItems);
+          if (currentHash !== lastDataHash) {
+            rawItems = newItems;
+            lastDataHash = currentHash;
+            
+            // 只有當「班級篩選」還是「全部」時，才重新生成選項，避免干擾使用者操作
+            const classFilter = document.getElementById("classFilter");
+            if (classFilter.value === "all") {
+              renderClassOptions(rawItems);
+            }
+            
+            renderAll();
+          }
+          btn.innerText = "重新整理";
+          document.getElementById("syncStatus").innerHTML = '<span style="color:#22c55e">●</span> 自動同步中';
+        })
+        .catch(err => {
+          console.error("載入出勤資料失敗:", err);
+          btn.innerText = "重試";
+          document.getElementById("syncStatus").innerHTML = '<span style="color:#ef4444">●</span> 連線中斷';
+        });
+    }
+
+    function renderClassOptions(allItems) {
+      const sel = document.getElementById("classFilter");
+      if (!sel) return;
+
+      const currentVal = sel.value;
+      const set = new Set();
+      allItems.forEach(it => {
+        if (it.class) set.add(it.class);
+      });
+
+      const classes = Array.from(set).sort();
+      let html = '<option value="all">全部</option>';
+      classes.forEach(c => {
+        html += `<option value="${c}">${c}</option>`;
+      });
+      sel.innerHTML = html;
+      sel.value = currentVal; // 保持選中項
+    }
+
+    function renderAll() {
+      const searchValue = document.getElementById("searchInput").value.trim().toLowerCase();
+      const statusFilter = document.getElementById("statusFilter").value;
+      const classFilter  = document.getElementById("classFilter").value;
+      const lateOnly     = document.getElementById("lateOnly").checked;
+
+      let items = rawItems.slice();
+
+      if (searchValue) {
+        items = items.filter(it => (it.name || "").toLowerCase().includes(searchValue));
+      }
+      if (statusFilter !== "all") {
+        items = items.filter(it => it.status === statusFilter);
+      }
+      if (classFilter !== "all") {
+        items = items.filter(it => (it.class || "") === classFilter);
+      }
+      if (lateOnly) {
+        items = items.filter(it => it.is_late === true);
+      }
+
+      items.sort((a, b) => {
+        let va = a[currentSortKey] || "";
+        let vb = b[currentSortKey] || "";
+
+        if (currentSortKey === "time_str") {
+          if (!va && !vb) return 0;
+          if (!va) return 1;
+          if (!vb) return -1;
+        }
+
+        if (typeof va === "string") va = va.toLowerCase();
+        if (typeof vb === "string") vb = vb.toLowerCase();
+
+        if (va < vb) return currentSortDir === "asc" ? -1 : 1;
+        if (va > vb) return currentSortDir === "asc" ? 1 : -1;
+        return 0;
+      });
+
+      renderTableBody(items);
+      renderSummary(rawItems);
+      renderClassSummary(rawItems);
+      renderRowCount(items);
+      renderSortIndicators();
+    }
+
+    function getInitials(name) {
+      if (!name) return "?";
+      if (name.length <= 2) return name;
+      return name.slice(-2);
+    }
+
+    function renderTableBody(items) {
+      const tbody = document.getElementById("tbody");
+      tbody.innerHTML = "";
+
+      items.forEach(row => {
+        const tr = document.createElement("tr");
+
+        const tdName = document.createElement("td");
+        const nameWrap = document.createElement("div");
+        nameWrap.className = "name-cell";
+        const avatar = document.createElement("div");
+        avatar.className = "name-avatar";
+        avatar.textContent = getInitials(row.name || "");
+        const nameText = document.createElement("span");
+        nameText.textContent = row.name || "";
+        nameWrap.appendChild(avatar);
+        nameWrap.appendChild(nameText);
+        tdName.appendChild(nameWrap);
+        tr.appendChild(tdName);
+
+        const tdClass = document.createElement("td");
+        tdClass.textContent = row.class || "未設定";
+        tr.appendChild(tdClass);
+
+        const tdStatus = document.createElement("td");
+        const statusSpan = document.createElement("span");
+        if (row.status === "checked_in") {
+          statusSpan.className = "status-pill status-ok";
+          statusSpan.innerHTML = '<span class="status-dot-ok"></span><span>已簽到</span>';
+        } else if (row.status === "on_leave" || row.has_leave) {
+          statusSpan.className = "status-pill status-leave";
+          statusSpan.innerHTML = '<span class="status-dot-leave"></span><span>請假（批准）</span>';
+        } else {
+          statusSpan.className = "status-pill status-miss";
+          statusSpan.innerHTML = '<span class="status-dot-miss"></span><span>未簽到</span>';
+        }
+        tdStatus.appendChild(statusSpan);
+        tr.appendChild(tdStatus);
+
+        const tdTime = document.createElement("td");
+        tdTime.className = "time-cell";
+        if (row.time_str) {
+          tdTime.textContent = row.time_str;
+        } else {
+          tdTime.textContent = "尚未簽到";
+          tdTime.classList.add("empty");
+        }
+        tr.appendChild(tdTime);
+
+        const tdLate = document.createElement("td");
+        if (row.status === "checked_in") {
+          const lateSpan = document.createElement("span");
+          if (row.is_late === true) {
+            lateSpan.className = "status-pill status-miss";
+            lateSpan.innerHTML = '<span class="status-dot-miss"></span><span>遲到</span>';
+          } else {
+            lateSpan.className = "status-pill status-ok";
+            lateSpan.innerHTML = '<span class="status-dot-ok"></span><span>準時</span>';
+          }
+          tdLate.appendChild(lateSpan);
+        } else if (row.status === "on_leave" || row.has_leave) {
+          const leaveSpan = document.createElement("span");
+          leaveSpan.className = "status-pill status-leave";
+          leaveSpan.innerHTML = '<span class="status-dot-leave"></span><span>請假</span>';
+          tdLate.appendChild(leaveSpan);
+        } else {
+          if (row.is_late === true) {
+            const lateSpan = document.createElement("span");
+            lateSpan.className = "status-pill status-miss";
+            lateSpan.innerHTML = '<span class="status-dot-miss"></span><span>遲到（未簽到）</span>';
+            tdLate.appendChild(lateSpan);
+          } else {
+            tdLate.textContent = "—";
+            tdLate.className = "time-cell empty";
+          }
+        }
+        tr.appendChild(tdLate);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderClassSummary(allItems) {
+      const container = document.getElementById("classSummary");
+      if (!container) return;
+
+      const classMap = new Map();
+      allItems.forEach(it => {
+        const cls = it.class || "未設定";
+        if (!classMap.has(cls)) {
+          classMap.set(cls, {
+            className: cls,
+            total: 0,
+            checked: 0,
+            late: 0,
+            absent: 0,
+            leave: 0,
+          });
+        }
+        const rec = classMap.get(cls);
+        rec.total += 1;
+
+        const isLeave = (it.status === "on_leave" || it.has_leave);
+        if (isLeave) {
+          rec.leave += 1;
+        } else if (it.status === "checked_in") {
+          rec.checked += 1;
+          if (it.is_late === true) rec.late += 1;
+        } else {
+          rec.absent += 1;
+          if (it.is_late === true) rec.late += 1;
+        }
+      });
+
+      const rows = Array.from(classMap.values()).sort((a, b) => {
+        if (a.className === "未設定") return 1;
+        if (b.className === "未設定") return -1;
+        return a.className.localeCompare(b.className, "zh-Hant");
+      });
+
+      let tableHtml = `
+        <div class="class-summary-title">
+          <div>班級統計</div>
+          <span>點選某一班級，可快速套用下方列表的「班級篩選」。</span>
+        </div>
+        <table class="class-summary-table">
+          <thead>
+            <tr>
+              <th>班級</th>
+              <th>總人數</th>
+              <th>已簽到</th>
+              <th>遲到</th>
+              <th>未簽到</th>
+              <th>請假</th>
+              <th>出勤率</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      rows.forEach(rec => {
+        const denom = Math.max(0, rec.total - rec.leave);
+        const rate = denom === 0 ? 0 : Math.round(rec.checked * 1000 / denom) / 10;
+        const rateClass = rate >= 90 ? "class-rate-good" : "class-rate-bad";
+        tableHtml += `
+          <tr data-class="${rec.className}">
+            <td class="class-name-cell">${rec.className}</td>
+            <td>${rec.total}</td>
+            <td>${rec.checked}</td>
+            <td>${rec.late}</td>
+            <td>${rec.absent}</td>
+            <td>${rec.leave}</td>
+            <td class="${rateClass}">${rate}%</td>
+          </tr>
+        `;
+      });
+
+      tableHtml += `
+          </tbody>
+        </table>
+      `;
+      container.innerHTML = tableHtml;
+
+      const rowsEl = container.querySelectorAll("tbody tr[data-class]");
+      rowsEl.forEach(tr => {
+        tr.addEventListener("click", () => {
+          const cls = tr.getAttribute("data-class");
+          const sel = document.getElementById("classFilter");
+          if (!sel) return;
+          if (cls === "未設定") sel.value = "all";
+          else sel.value = cls;
+          renderAll();
+        });
+      });
+    }
+
+    function renderRowCount(items) {
+      document.getElementById("rowCountLabel").textContent = `顯示筆數：${items.length}`;
+    }
+
+    function renderSortIndicators() {
+      const keys = ["name", "class", "status", "time_str"];
+      keys.forEach(k => {
+        const span = document.getElementById("sortIndicator-" + k);
+        if (!span) return;
+        if (k === currentSortKey) {
+          span.textContent = currentSortDir === "asc" ? "▲" : "▼";
+        } else {
+          span.textContent = "";
+        }
+      });
+    }
+
+    function renderSummary(allItems) {
+      const container = document.getElementById("summary");
+      if (!container) return;
+
+      const total   = allItems.length;
+      const checked = allItems.filter(it => it.status === "checked_in").length;
+      const leave   = allItems.filter(it => it.status === "on_leave" || it.has_leave).length;
+      const late    = allItems.filter(it => it.status === "checked_in" && it.is_late === true).length;
+      const absent  = total - checked - leave;
+      const denom   = Math.max(0, total - leave);
+      const rate    = denom === 0 ? 0 : Math.round(checked * 1000 / denom) / 10;
+
+      container.innerHTML = `
+        <div class="summary-card2">
+          <div class="summary-label2">總人數</div>
+          <div class="summary-value2">${total}</div>
+        </div>
+        <div class="summary-card2">
+          <div class="summary-label2">已簽到 <span class="summary-tag-ok">正常</span></div>
+          <div class="summary-value2">${checked}</div>
+        </div>
+        <div class="summary-card2">
+          <div class="summary-label2">未簽到 / 遲到 / 請假</div>
+          <div class="summary-value2">${absent} / ${late} / ${leave}</div>
+        </div>
+        <div class="summary-card2">
+          <div class="summary-label2">出勤率 <span class="summary-tag-rate">已扣除請假</span></div>
+          <div class="summary-value2">${rate}%</div>
+        </div>
+      `;
+    }
+
+    function setupEvents() {
+      document.getElementById("searchInput").addEventListener("input", renderAll);
+      document.getElementById("statusFilter").addEventListener("change", renderAll);
+      document.getElementById("classFilter").addEventListener("change", renderAll);
+      document.getElementById("lateOnly").addEventListener("change", renderAll);
+      document.getElementById("refreshBtn").addEventListener("click", fetchAttendance);
+
+      const ths = document.querySelectorAll("th.sortable");
+      ths.forEach(th => {
+        th.addEventListener("click", () => {
+          const key = th.getAttribute("data-key");
+          if (key === currentSortKey) {
+            currentSortDir = (currentSortDir === "asc") ? "desc" : "asc";
+          } else {
+            currentSortKey = key;
+            currentSortDir = "asc";
+          }
+          renderAll();
+        });
+      });
+    }
+
+    setupEvents();
+    fetchAttendance();
+
+    // 每 5 秒自動抓取一次新資料，實現「即時監控」效果
+    setInterval(fetchAttendance, 5000);
+  </script>
+
+</body>
+</html>

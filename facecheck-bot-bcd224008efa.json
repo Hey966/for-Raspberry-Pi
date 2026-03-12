@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "facecheck-bot",
+  "private_key_id": "bcd224008efa1cb8f10ea6b5f2107f137f9d420a",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC3tfBJPc5oCo9c\nFq2RzAOXq/56d9UoDK9JEuOtb56XW967+KDwLCQyvY5w0Zu2qrxw7G9BO6n2GvAS\nelPQ3nMEuHnFnoZsepYTQRoBrALLLx0iz69DCZYQSIYKysbe1+Ii26KZtgkaHfKO\nnIrcDtHj8VMara65uzbpGYzGbE+HFnEFTpG8cdw0HBGt5ys78atlTkPhYEXhiXyk\nFQsBcKXEO6NQMSA8UXwI9XeEB/aI47dcUPSSpWkISGdh/9CSZtx2IUfdiNkOVjFa\n/nceIzqugLl9Bk8c60ecW9W6Sjz8hOJsMF9hjAjTG3c81Y3uS4CwYgqES2pfbqaW\nNLEbb+8bAgMBAAECggEAMCD8sht8o1o846nXUC6MNGStd0VEtUjZdUH7HvlyqYG6\nkTFabIGL/DUYB6uKaWlClC0FGqh4Zw74nUaqBbr5lB+GW4Uj/3CAN8wi9ZQsaTHP\nJssVRfFRfLObVmF4h3I0fuBesXl02gBFhyIw6OUDDP4wwPkGoQcQpDH65RMEJMYE\nck0Kr5RNCaL0jFJRv6UgFp+lX2cSF/TZXZbMW9DXKr4tcmFusM1+UMluIklswiqf\nUCObIy3VD6OY5ZDptP0r8ClRqB1zXRdwIxPttL9fUp7+2KVvrCn0gayF042QqIa2\nsUlzS1fTIYw6aOHE9/CN+ZoZHDbJEQmkR7TWhYsjeQKBgQDzf3yDtj0UZrQTnE+c\nyRvEi4PeJSGWqlQATcmID8JOVPGzDgoyWEXbifJzi01RK0kiImbZ3mt8ReIc6tKN\naiGeSkHXB5mX5rwQZs41LAl2LEFRiLeq6QpIquU/ax5YUrw9pL3pIo/hhUXs4IEw\nQyKDSP+24SrwUhiB6t0EhfAHIwKBgQDBJJ0pQ2e2O08ibErhQK/mVSdeqORu7DJf\nQ2EFKu7dkp7qiDOpVnxQ8FUxrOrhMPjYYpkZyk0cUr4S7Dlyg3DCXgqrBB/qBOL/\nrJTcE61a015+hrSyW71C2YCN+S3A+1oJbhxawTk0HR/vcy08hSsu1CUpfS6bf4uT\nlpfdz8fzqQKBgQCnHcEkWIfVH6PJrccKERCItUP8y7kgwafDSZ/eTQqLXktAG4ut\n/916DlQjLuESq0WXMssqDjfw47mLJTL6sXN/QvGrFeE5WreJ/jTaU23u9/Kgddew\nah6PvxJ1kxwRfD8Lg6x/fCQJoMFcEL05lWnzdr9iEWm55G5DhCDKgO46xwKBgCQ8\nATwHiEJ41/zGQjoGD7nvicZJeymQKFcU5fO5PTzWT/gB+2cucX4hyGncXehHbrfx\nr3VWLac9oqkcJh7kp9ffGrNAv9gAeLGsp/StwF0EwHqOPQIlEdmjwmlgMQQ+Y4LX\nZHxmOZwcRqx+eCMdfJ95b0tcT80eXYofu3gCjimZAoGBAL61X2Q9OHP2gdofws7l\n/fgsIRekaXpsl522IxKBdVeD7hK+G6sue9uH8neHNrHdpsFRsHSNlnNn31W3XKcb\naBEsBlTeRUHWnozKCmhOTKf/qWLCXkjB1MpH33NlNFjVzwuzZ4Ds2ZhQR2uphb9B\nahEs3i3HGoM+zDlqWZI0o4Mg\n-----END PRIVATE KEY-----\n",
+  "client_email": "facecheck-service@facecheck-bot.iam.gserviceaccount.com",
+  "client_id": "111561367827188244085",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/facecheck-service%40facecheck-bot.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

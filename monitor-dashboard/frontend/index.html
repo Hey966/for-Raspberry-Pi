@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>即時監控儀表板</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body{font-family:system-ui,'Microsoft JhengHei','Noto Sans TC',sans-serif;margin:0;padding:16px;background:#fafafa}
+    .card{max-width:1000px;margin:0 auto}
+    canvas{background:#fff;border-radius:8px;padding:12px}
+    .panels{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+    .panel{flex:1 1 200px;padding:12px;border-radius:8px;background:#f7f7f7;white-space:pre-line}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>即時監控儀表板</h2>
+    <p>資料來源：後端 SSE (/stream)。下方圖表示最近 60 筆資料。</p>
+
+    <canvas id="chart" width="900" height="300"></canvas>
+
+    <div class="panels">
+      <div class="panel">
+        <h4>最新讀值</h4>
+        <div id="latest">尚未收到資料</div>
+      </div>
+      <div class="panel">
+        <h4>狀態</h4>
+        <div id="status">連線中...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  const MAX_POINTS = 60;
+  const labels = [], tempData = [], humData = [], peopleData = [];
+
+  const ctx = document.getElementById('chart').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: '溫度 (°C)', data: tempData, tension: 0.3, yAxisID: 'y' },
+        { label: '濕度 (%)',   data: humData,  tension: 0.3, yAxisID: 'y' },
+        { label: '人數',       data: peopleData, type: 'bar', tension: 0.3, yAxisID: 'y1' }
+      ]
+    },
+    options: {
+      scales: {
+        y:  { position: 'left' },
+        y1: { position: 'right', grid: { display:false } }
+      }
+    }
+  });
+
+  function pushPoint(ts, temp, hum, people){
+    const t = new Date(ts*1000).toLocaleTimeString();
+    labels.push(t); tempData.push(temp); humData.push(hum); peopleData.push(people);
+    if(labels.length > MAX_POINTS){ labels.shift(); tempData.shift(); humData.shift(); peopleData.shift(); }
+    chart.update();
+    document.getElementById('latest').innerText = `時間：${t}\n溫度：${temp}°C\n濕度：${hum}%\n人數：${people}`;
+  }
+
+  const es = new EventSource('/stream');
+  es.onmessage = ev => {
+    try { const d = JSON.parse(ev.data); pushPoint(d.timestamp, d.temp, d.hum, d.people); }
+    catch(e){ console.error(e); }
+  };
+  es.onerror = () => { document.getElementById('status').innerText = '連線中斷，將自動重試...'; };
+  es.onopen  = () => { document.getElementById('status').innerText = 'SSE 已連線'; };
+
+  async function fetchOnce(){
+    try { const r = await fetch('/api/data'); const d = await r.json(); pushPoint(d.timestamp, d.temp, d.hum, d.people); }
+    catch(e){ console.warn('輪詢失敗', e); }
+  }
+  (async ()=>{ for(let i=0;i<8;i++){ await fetchOnce(); await new Promise(r=>setTimeout(r,120)); } })();
+  </script>
+</body>
+</html>

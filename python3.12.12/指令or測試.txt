@@ -1,0 +1,11 @@
+conda activate base
+
+conda activate camara
+
+cd C:\Users\jack0\Desktop\for Raspberry Pi\python3.12.12
+
+set LATE_CUTOFF=23:00
+
+echo %LATE_CUTOFF%
+
+python server.py

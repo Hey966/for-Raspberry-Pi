@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <title> 航院校務系統 - 首頁</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f3f4f6;
+      color:#111827;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* ===== 頂端藍色區塊 / 校名 ===== */
+    .site-header {
+      background: #003b7a;
+      color: #fff;
+    }
+    .site-header-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      gap: 14px;
+    }
+    .site-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #fff;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .site-logo img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+    .site-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .site-title-main {
+      font-size: 20px;
+      letter-spacing: 0.12em;
+    }
+    .site-title-sub {
+      font-size: 13px;
+      opacity: 0.85;
+    }
+
+    /* ===== 深藍導覽列 ===== */
+    .nav-bar {
+      background: #00539f;
+    }
+    .nav-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+    }
+    .nav-menu {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .nav-item {
+      position: relative;
+    }
+    .nav-link {
+      display: block;
+      padding: 10px 18px;
+      font-size: 14px;
+      color: #e5f0ff;
+      white-space: nowrap;
+    }
+    .nav-link:hover,
+    .nav-item.active > .nav-link {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+    .nav-item.has-submenu:hover .submenu {
+      display: block;
+    }
+    .submenu {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: 100%;
+      min-width: 180px;
+      background: #0077c8;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10;
+    }
+    .submenu a {
+      display: block;
+      padding: 8px 14px;
+      font-size: 13px;
+      color: #f9fafb;
+    }
+    .submenu a:hover {
+      background: rgba(255,255,255,0.12);
+    }
+
+    @media (max-width: 720px) {
+      .nav-inner { padding: 0 8px; }
+      .nav-link { padding: 8px 10px; font-size: 13px; }
+    }
+
+    /* ===== 麵包屑 ===== */
+    .breadcrumb-bar {
+      background: #e5e7eb;
+      border-bottom: 1px solid #d1d5db;
+    }
+    .breadcrumb-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 6px 16px;
+      font-size: 12px;
+      color: #4b5563;
+    }
+
+    /* ===== 主內容 ===== */
+    .page {
+      max-width: 1160px;
+      margin: 16px auto 24px;
+      padding: 0 16px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 2.1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 880px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      padding: 16px 18px 18px;
+    }
+
+    .card-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:10px;
+    }
+    .card-title {
+      margin: 0;
+      font-size: 17px;
+    }
+    .card-more {
+      font-size: 12px;
+      color: #2563eb;
+    }
+
+    /* ===== 最新公告列表 ===== */
+    .news-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      font-size: 14px;
+    }
+    .news-item {
+      display: flex;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .news-item:last-child {
+      border-bottom: none;
+    }
+    .news-date {
+      font-size: 12px;
+      color: #6b7280;
+      white-space: nowrap;
+      flex-shrink: 0;
+      width: 70px;
+    }
+    .news-title {
+      flex: 1;
+      color: #1f2933;
+    }
+    .news-title a:hover {
+      text-decoration: underline;
+    }
+
+    /* ===== 快速連結 ===== */
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 8px;
+      margin-top: 6px;
+    }
+    @media (max-width: 480px) {
+      .quick-links {
+        grid-template-columns: 1fr;
+      }
+    }
+    .quick-link {
+      display: block;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      font-size: 14px;
+      text-align: center;
+    }
+    .quick-link.main {
+      background: #2563eb;
+      color: #fff;
+      border-color: #1d4ed8;
+    }
+    .quick-link.main:hover {
+      background:#1d4ed8;
+    }
+    .quick-link:hover {
+      box-shadow: 0 0 0 1px rgba(37,99,235,0.3);
+    }
+
+    /* ===== 右側公告 ===== */
+    .info-item {
+      font-size: 14px;
+      margin-bottom: 10px;
+      line-height: 1.7;
+    }
+    .info-label {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #4338ca;
+      font-size: 11px;
+      margin-right: 4px;
+    }
+    .info-text {
+      display: inline;
+    }
+
+    .footer {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 10px 16px 18px;
+      font-size: 12px;
+      color:#6b7280;
+      text-align:center;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="site-logo">
+        <img src="{{ url_for('static', filename='img/cover.png') }}" alt="School Logo">
+      </div>
+      <div class="site-title-block">
+        <div class="site-title-main"> 航院系統</div>
+        <div class="site-title-sub">Campus Information System</div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="nav-bar">
+    <div class="nav-inner">
+      <ul class="nav-menu">
+        <li class="nav-item active">
+          <a class="nav-link" href="{{ url_for('index_page') }}">首頁</a>
+        </li>
+        <li class="nav-item has-submenu">
+          <a class="nav-link" href="#">校務服務</a>
+          <div class="submenu">
+            <a href="{{ url_for('attendance_today_page') }}">出勤列表</a>
+            <a href="{{ url_for('leave_page') }}">學生請假系統</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('leave_page') }}">學生請假系統</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('attendance_today_page') }}">出勤列表</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="breadcrumb-bar">
+    <div class="breadcrumb-inner">
+      首頁
+    </div>
+  </div>
+
+  <main class="page">
+    <div class="layout">
+
+      <section class="card">
+        <div class="card-header">
+          <h2 class="card-title">最新公告 / 系統訊息</h2>
+          <a href="#" class="card-more">更多公告 ›</a>
+        </div>
+
+        <ul class="news-list">
+          <li class="news-item">
+            <div class="news-date">2025-11-26</div>
+            <div class="news-title">
+              <a href="{{ url_for('attendance_today_page') }}">出勤系統已啟用，請導師使用帳號登入查詢學生出勤紀錄。</a>
+            </div>
+          </li>
+
+          <li class="news-item">
+            <div class="news-date">2025-11-25</div>
+            <div class="news-title">
+              <a href="{{ url_for('leave_page') }}">學生請假系統上線，請同學於 LINE 填寫請假單後，由導師於本系統審核。</a>
+            </div>
+          </li>
+
+          <li class="news-item">
+            <div class="news-date">2025-11-20</div>
+            <div class="news-title">
+              校園門禁與人臉辨識考勤正式整合，請同學務必完成 LINE 綁定與班級設定。
+            </div>
+          </li>
+        </ul>
+
+        <div style="margin-top:14px; border-top:1px solid #e5e7eb; padding-top:10px;">
+          <h3 style="margin:0 0 8px; font-size:15px;">常用功能快速連結</h3>
+
+          <div class="quick-links">
+            <a class="quick-link main" href="{{ url_for('attendance_today_page') }}">🧾 出勤列表（導師/教官）</a>
+            <a class="quick-link main" href="{{ url_for('leave_page') }}">📄 學生請假審核</a>
+            <a class="quick-link" href="#">📘 校務行事曆（預留）</a>
+            <a class="quick-link" href="#">💻 線上成績查詢（預留）</a>
+          </div>
+        </div>
+      </section>
+
+      <aside>
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">系統公告 / 使用說明</h2>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">出勤系統</span>
+            <span class="info-text">本系統與人臉辨識伺服器連動，學生於攝影機前完成簽到後，資料將即時顯示於「出勤列表」。</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">請假流程</span>
+            <span class="info-text">學生於 LINE 輸入請假格式，導師於本系統「學生請假系統」即可審核批准/駁回。</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">技術支援</span>
+            <span class="info-text">若發現姓名、班級或出勤狀態有誤，請確認是否完成 LINE 綁定與班級設定。</span>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 16px; border-top: 4px solid #00539f;">
+          <div class="card-header">
+            <h2 class="card-title">📊 系統即時概況</h2>
+          </div>
+          <div id="status-loading" style="font-size: 13px; color: #6b7280;">同步中...</div>
+          <div id="status-content" style="display: none;">
+            <div class="info-item">
+              <span class="info-label" style="background: #eef2ff; color: #4338ca;">今日簽到</span>
+              <span class="info-text"><strong id="stat-attendance">0</strong> 人</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label" style="background: #fff7ed; color: #c2410c;">待辦請假</span>
+              <span class="info-text"><strong id="stat-leave">0</strong> 筆</span>
+            </div>
+            <div style="font-size: 11px; color: #9ca3af; margin-top: 8px; border-top: 1px solid #f3f4f6; padding-top: 4px;">
+              更新時間：<span id="last-update">--:--</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="footer">
+      航院校務系統　｜　本系統僅供教職員使用　｜　© 2026 航技學院 
+  </div>
+
+  <script>
+    // 定義更新邏輯
+    function refreshStats() {
+      // 抓取今日出勤 JSON 與 請假清單 JSON
+      Promise.all([
+        fetch('/attendance/today.json').then(res => res.json()),
+        fetch('/leave/list.json').then(res => res.json())
+      ])
+      .then(([attendanceData, leaveData]) => {
+        // 更新顯示文字
+        document.getElementById('stat-attendance').innerText = attendanceData.length;
+        
+        // 過濾出 status 等於 pending 的請假案件
+        const pendingCount = leaveData.filter(item => item.status === 'pending').length;
+        document.getElementById('stat-leave').innerText = pendingCount;
+
+        // 切換顯示狀態
+        document.getElementById('status-loading').style.display = 'none';
+        document.getElementById('status-content').style.display = 'block';
+        
+        // 更新時間戳記
+        const now = new Date();
+        document.getElementById('last-update').innerText = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
+      })
+      .catch(err => {
+        console.warn("自動更新失敗，稍後重試:", err);
+        document.getElementById('status-loading').innerText = "連線更新中...";
+      });
+    }
+
+    // 每 10 秒跑一次
+    setInterval(refreshStats, 10000);
+    // 進入網頁立刻跑一次
+    window.addEventListener('load', refreshStats);
+  </script>
+</body>
+</html>

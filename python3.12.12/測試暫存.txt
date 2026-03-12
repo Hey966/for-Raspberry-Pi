@@ -1,0 +1,31 @@
+{
+  "_by_user_id": {
+    "Ud528905b62a5c019e3316708d395b9a6": {
+      "name": "郭昶邑",
+      "class": "航電一組"
+    },
+    "Ua97ef69a2dc2f51544126b8fda343a0e": {
+      "name": "王科穎",
+      "class": "航電一組"
+    },
+    "U6c86de2db7a143eb8fe308797646f418": {
+      "name": "林廣至",
+      "class": "航電二組"
+    },
+    "U58b0d17d233e503467da9f9fc51905dc": {
+      "name": "楊依靜",
+      "class": "航電二組"
+    },
+    "U96ff83e1e18f26a4bfb8a8b2541eb2ef": {
+      "name": "吳胤言",
+      "class": "航電二組"
+    }
+  },
+  "_by_name": {
+    "王科穎": "Ua97ef69a2dc2f51544126b8fda343a0e",
+    "郭昶邑": "Ud528905b62a5c019e3316708d395b9a6",
+    "林廣至": "U6c86de2db7a143eb8fe308797646f418",
+    "楊依靜": "U58b0d17d233e503467da9f9fc51905dc",
+    "吳胤言": "U96ff83e1e18f26a4bfb8a8b2541eb2ef"
+  }
+}
