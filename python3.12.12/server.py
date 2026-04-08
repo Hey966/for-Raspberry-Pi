@@ -158,16 +158,15 @@ def bind_user(user_id: str, name: str):
 
 def get_class_for_name(name: str) -> str:
     """
-    依姓名查詢班級：
-    1. 先從 users.json 的 LINE 綁定資料找
-    2. 找不到再從 _web_users 找
+    依辨識名稱或顯示名稱查班級
     """
     name = _clean(name)
     data = load_users()
 
-    # 先找 LINE 綁定資料
     by_name = data.get("_by_name", {})
     by_uid = data.get("_by_user_id", {})
+
+    # 1) 用顯示名稱找有 LINE 的人
     uid = by_name.get(name)
     if uid:
         rec = by_uid.get(uid, {})
@@ -175,10 +174,86 @@ def get_class_for_name(name: str) -> str:
         if cls:
             return cls
 
-    # 再找 _web_users
+    # 2) 用 face_name 找有 LINE 的人
+    for uid, rec in (by_uid or {}).items():
+        candidate = _clean(rec.get("face_name", rec.get("name", "")))
+        if candidate == name:
+            return _clean(rec.get("class", ""))
+
+    # 3) 用顯示名稱找 _web_users
     web_users = data.get("_web_users", {})
     rec = web_users.get(name, {})
-    return _clean(rec.get("class", ""))
+    cls = _clean(rec.get("class", ""))
+    if cls:
+        return cls
+
+    # 4) 用 face_name 找 _web_users
+    for display_name, rec in (web_users or {}).items():
+        candidate = _clean(rec.get("face_name", rec.get("name", "")))
+        if candidate == name:
+            return _clean(rec.get("class", ""))
+
+    return ""
+
+def get_order_for_name(name: str) -> int:
+    """
+    依辨識名稱或顯示名稱查排序欄位 order
+    找不到就回傳很大的數字，排最後
+    """
+    name = _clean(name)
+    data = load_users()
+
+    by_name = data.get("_by_name", {})
+    by_uid = data.get("_by_user_id", {})
+
+    # 1) 用顯示名稱找有 LINE 的人
+    uid = by_name.get(name)
+    if uid:
+        rec = by_uid.get(uid, {})
+        return int(rec.get("order", 999999))
+
+    # 2) 用 face_name 找有 LINE 的人
+    for uid, rec in (by_uid or {}).items():
+        candidate = _clean(rec.get("face_name", rec.get("name", "")))
+        if candidate == name:
+            return int(rec.get("order", 999999))
+
+    # 3) 用顯示名稱找 _web_users
+    web_users = data.get("_web_users", {})
+    rec = web_users.get(name)
+    if rec:
+        return int(rec.get("order", 999999))
+
+    # 4) 用 face_name 找 _web_users
+    for display_name, rec in (web_users or {}).items():
+        candidate = _clean(rec.get("face_name", rec.get("name", "")))
+        if candidate == name:
+            return int(rec.get("order", 999999))
+
+    return 999999
+
+
+def get_display_name(face_name: str) -> str:
+    """
+    依辨識名稱(face_name)找正式顯示名稱(name)
+    找不到就直接回傳 face_name
+    """
+    face_name = _clean(face_name)
+    data = load_users()
+
+    # 先找有 LINE 的人
+    for uid, rec in (data.get("_by_user_id") or {}).items():
+        candidate = _clean(rec.get("face_name", rec.get("name", "")))
+        if candidate == face_name:
+            return _clean(rec.get("name", face_name))
+
+    # 再找 _web_users
+    for display_name, rec in (data.get("_web_users") or {}).items():
+        candidate = _clean(rec.get("face_name", rec.get("name", "")))
+        if candidate == face_name:
+            return _clean(rec.get("name", display_name))
+
+    return face_name
 
 # ---- 請假資料 ----
 def load_leaves():
@@ -575,8 +650,9 @@ def _load_members_map():
                     mapping[_clean(k)] = _clean(v)
 
             # 2) 只顯示在網頁、沒有 LINE 的使用者
-            for k, rec in (d.get("_web_users") or {}).items():
-                mapping.setdefault(_clean(k), None)
+            for display_name, rec in (d.get("_web_users") or {}).items():
+                face_name = _clean(rec.get("face_name", display_name))
+                mapping.setdefault(face_name, None)
 
         except Exception as e:
             print("[USERS_JSON][ERR]", e)
@@ -644,7 +720,7 @@ def get_today_attendance():
     global NAME_TO_UID
     NAME_TO_UID = _load_members_map()
 
-    for name in sorted(NAME_TO_UID.keys()):
+    for name in NAME_TO_UID.keys():
         uid = NAME_TO_UID.get(name)
         ts = last_checkin_time[name]
 
@@ -675,14 +751,16 @@ def get_today_attendance():
         cls = get_class_for_name(name)
 
         rows.append({
-            "name": name,
-            "status": status,      # checked_in / not_checked / on_leave
-            "time_str": time_str,  # 簽到時間字串
-            "is_late": is_late,    # bool，請假一律 False
-            "class": cls,          # 班級
-            "has_leave": has_leave # bool，同 status == "on_leave"
+            "name": get_display_name(name),
+            "status": status,
+            "time_str": time_str,
+            "is_late": is_late,
+            "class": cls,
+            "has_leave": has_leave,
+            "order": get_order_for_name(name)
         })
 
+    rows.sort(key=lambda r: (r.get("order", 999999), r.get("name", "")))
     return rows
 
 # 載入人臉 encodings
@@ -920,25 +998,28 @@ def recognize():
         enc = f.normed_embedding.astype("float32")
         enc = l2_normalize(enc)
 
-        name, sim = decide_name(enc)
-        print(f"[DEBUG] 最佳匹配：name={name}, sim={sim}, bbox=({x},{y},{w_box},{h_box})")
+        face_name, sim = decide_name(enc)
+        display_name = get_display_name(face_name)
+
+        print(f"[DEBUG] 最佳匹配：face_name={face_name}, display_name={display_name}, sim={sim}, bbox=({x},{y},{w_box},{h_box})")
 
         result_faces.append({
-            "name": name,
+            "name": display_name,
+            "face_name": face_name,
             "sim": float(sim) if sim is not None else None,
             "bbox": [x, y, w_box, h_box],
         })
 
         # 設定 main_name / main_sim
         if f is main_f:
-            main_name = name
+            main_name = display_name
             main_sim = sim
 
         # 針對每個有名字的人 → 丟到背景做「今天第一次簽到」
-        if name != "Unknown":
+        if face_name != "Unknown":
             threading.Thread(
                 target=handle_checkin_in_background,
-                args=(name, now),
+                args=(face_name, now),
                 daemon=True
             ).start()
 

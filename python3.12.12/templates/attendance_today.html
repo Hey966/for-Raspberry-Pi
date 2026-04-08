@@ -617,7 +617,7 @@
   <script>
     const API_URL = "/attendance/today.json";
     let rawItems = [];
-    let currentSortKey = "name";
+    let currentSortKey = "order";
     let currentSortDir = "asc";
     let lastDataHash = ""; // 用於檢測資料是否有變動
 
@@ -696,22 +696,28 @@
       }
 
       items.sort((a, b) => {
-        let va = a[currentSortKey] || "";
-        let vb = b[currentSortKey] || "";
+        let va = a[currentSortKey];
+        let vb = b[currentSortKey];
 
-        if (currentSortKey === "time_str") {
-          if (!va && !vb) return 0;
-          if (!va) return 1;
-          if (!vb) return -1;
-        }
+      if (currentSortKey === "order") {
+        va = Number(va ?? 999999);
+        vb = Number(vb ?? 999999);
+      } else if (currentSortKey === "time_str") {
+        va = va || "";
+        vb = vb || "";
 
-        if (typeof va === "string") va = va.toLowerCase();
-        if (typeof vb === "string") vb = vb.toLowerCase();
+        if (!va && !vb) return 0;
+        if (!va) return 1;
+        if (!vb) return -1;
+      } else {
+        va = (va || "").toString().toLowerCase();
+        vb = (vb || "").toString().toLowerCase();
+      }
 
-        if (va < vb) return currentSortDir === "asc" ? -1 : 1;
-        if (va > vb) return currentSortDir === "asc" ? 1 : -1;
-        return 0;
-      });
+      if (va < vb) return currentSortDir === "asc" ? -1 : 1;
+      if (va > vb) return currentSortDir === "asc" ? 1 : -1;
+      return 0;
+    });
 
       renderTableBody(items);
       renderSummary(rawItems);
